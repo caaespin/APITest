@@ -30,8 +30,8 @@ def parse_ES_response(es_dict, the_size, the_from, the_sort, the_order):
 		'count' : len(es_dict['hits']['hits']),#25,
 		'total' : es_dict['hits']['total'],
 		'size' : the_size,
-		'from' : the_from,
-		'page' : (the_from/(the_size+1))+1, #(the_from/(the_size+1))+1
+		'from' : the_from+1,
+		'page' : (the_from/(the_size))+1, #(the_from/(the_size+1))+1
 		'pages' : -(-es_dict['hits']['total'] // the_size),
 		'sort' : the_sort,
 		'order' : the_order
@@ -65,6 +65,8 @@ def get_data():
 
 	#Will hold the query that will be used when calling ES
 	mQuery = {}
+	#Gets the index in [0 - (N-1)] form to communicate with ES
+	m_From -= 1 
 	print m_filters
 	#print dict(m_filters)
 	#print m_filters['file']
