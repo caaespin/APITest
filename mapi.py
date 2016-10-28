@@ -14,7 +14,15 @@ def parse_ES_response(es_dict, the_size, the_from, the_sort, the_order):
 	#print es_dict
 	protoDict = {'hits':[]}
 	for hit in es_dict['hits']['hits']:
-		protoDict['hits'].append(hit['_source'])
+		if '_source' in hit:
+			protoDict['hits'].append(hit['_source'])
+		#protoDict['hits'].append(hit['_source'])
+		else:
+			try:
+				protoDict['hits'].append(hit['fields'])
+			#protoDict['hits'].append(hit['fields'])
+			except:
+				pass
 		#print hit
 	#print protoDict
 
@@ -76,7 +84,7 @@ def get_data():
 		#print m_filters['file']
 		#pass
 	except:
-		m_fields_List = None
+		m_filters = None
 		mQuery = {"match_all":{}}
 		pass
 	mText = es.search(index='mfiles', body={"query": mQuery, "aggs" : {
