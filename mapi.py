@@ -1,7 +1,8 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 #import the FlaskElasticsearch package
 from flask.ext.elasticsearch import Elasticsearch
 #import json
+import ast
 
 app = Flask(__name__)
 es = Elasticsearch()
@@ -77,7 +78,7 @@ def parse_ES_response(es_dict):
 	#print protoDict
 
 	protoDict['pagination'] = {
-		'count' : 25,
+		'count' : len(es_dict['hits']['hits']),#25,
 		'total' : es_dict['hits']['total'],
 		'size' : 25,
 		'from' : 1,
@@ -93,7 +94,7 @@ def parse_ES_response(es_dict):
 	#Get the total for all the terms
 	for section in protoDict['termFacets']:
 		m_sum = 0
-		print section
+		#print section
 		for bucket in protoDict['termFacets'][section]['buckets']:
 			m_sum += bucket['doc_count']
 			#func_total(bucket['doc_count'])
@@ -103,9 +104,41 @@ def parse_ES_response(es_dict):
 	return protoDict
 
 #This returns the agreggate terms and the list of hits from ElasticSearch
-@app.route('/')
+@app.route('/files/')
 def get_data():
-	mText = es.search(index='mfiles', body={"query": {"match_all": {}}, "aggs" : {
+	#Get all the parameters from the URL
+	m_field = request.args.get('field')
+	m_filters = request.args.get('filters')
+	m_From = request.args.get('from', 1, type=int)
+	m_Size = request.args.get('size', 25, type=int)
+	m_Sort = request.args.get('sort', 'center_name')
+	m_Order = request.args.get('order', 'desc')
+
+	#Will hold the query that will be used when calling ES
+	mQuery = {}
+	print m_filters
+	#print dict(m_filters)
+	#print m_filters['file']
+	#get a list of all the fields requested
+	try:
+		m_fields_List = [x.strip() for x in m_field.split(',')]
+	except:
+		m_fields_List = None
+	print m_fields_List
+	#Get a list of all the Filters requested
+	try:
+		m_filters = ast.literal_eval(m_filters)
+		filt_list = [{"match":{x:y['is'][0]}} for x,y in m_filters['file'].items()]
+		mQuery = {"bool":{"must":filt_list}}
+		print filt_list	
+		print mQuery	
+		#print m_filters['file']
+		#pass
+	except:
+		m_fields_List = None
+		mQuery = {"match_all":{}}
+		pass
+	mText = es.search(index='mfiles', body={"query": mQuery, "aggs" : {
         "dataType" : {
             "terms" : { "field" : "analysis_type",
                         "size" : 9999}           
@@ -128,7 +161,7 @@ def get_data():
                 "size" : 99999
             }
         }
-    }}, size=25)
-	#print mText
+    }, "fields":m_fields_List}, from_=m_From, size=m_Size, sort=m_Sort+":"+m_Order)
+	#return jsonify(mText)
 	return jsonify(parse_ES_response(mText))
 
