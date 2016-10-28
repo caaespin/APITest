@@ -26,6 +26,90 @@ flask run
 ```
 <br>
 This will start the app. <br>
-6.-Open your browser and go to `http://127.0.0.1:5000/` to see the API response.  
+6.-Open your browser and go to `http://127.0.0.1:5000/files/` to see the API response.  
+<br>
+***API Instructions***<br>
+Currently there are 6 parameters supported. They are as follows:<br>
+<table width="100%">
+  <tbody>
+    <tr>
+      <th>Parameter</th>
 
+      <th>Description</th>
 
+      <th>Data Type</th>
+
+      <th>Example</th>
+    </tr>
+
+    <tr>
+      <td>field</td>
+
+      <td>Specifies which fields to return. Supplied as a series of strings separated by a comma</td>
+
+      <td>Array[String]</td>
+
+      <td>http://127.0.0.1:5000/files?field=analysis_type%2Cdownload_id <br>
+      This will return only the "analysis_type" and the "download_id" field from each hit. 
+</td>
+    </tr>
+
+    <tr>
+      <td>filters</td>
+
+      <td>Specifies which filters to use to return only the files with the matching criteria. Supplied as a string with the format:
+      {"file":{"fieldA":{"is":["VALUE"]}}}
+      </td>
+
+      <td>String</td>
+
+      <td>http://127.0.0.1:5000/files/?filters=%7B%22file%22%3A%7B%22file_type%22%3A%7B%22is%22%3A%5B%22bam%22%5D%7D%7D%7D<br>
+      This will return only those files who have a file format of type "bam"</td>
+    </tr>
+
+    <tr>
+      <td>from</td>
+
+      <td>Specifies the start index. Defaults to 1 if not specified:</td>
+
+      <td>Integer</td>
+
+      <td>http://127.0.0.1:5000/files/?from=26 <br>
+      This will return the next 25 results starting at index 26</td>
+    </tr>
+
+    <tr>
+      <td>size</td>
+
+      <td>Specifies how many hits to return. Defaults to 25</td>
+
+      <td>Integer</td>
+
+      <td>http://127.0.0.1:5000/files/?size=50 <br>
+      This will return 50 hits starting from 1</td>
+    </tr>
+
+    <tr>
+      <td>sort</td>
+
+      <td>Specifies the field under which the list of hits should be sorted. Defaults to "center_name"</td>
+
+      <td>String</td>
+
+      <td>http://127.0.0.1:5000/files/?sort=donor <br>
+      This will return the hits sorted by the "donor" field.
+      </td>
+    </tr>
+
+    <tr>
+      <td>order</td>
+
+      <td>Specifies the order in which the hits should be sorted; two options, "asc" and "desc". Defaults to "desc".</td>
+
+      <td>String</td>
+
+      <td>http://127.0.0.1:5000/files/?order=desc <br>
+      This will return the hits in descending order.</td>
+    </tr>
+  </tbody>
+</table>
