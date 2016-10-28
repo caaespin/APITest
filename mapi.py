@@ -10,82 +10,23 @@ es = Elasticsearch()
 #Assumption: objectId is download_id
 #Parses the elasticSearch response and makes it as similar as possible to the ICGC Data
 #Portal. String "DUMMY" is used when no data for that field is available.
-def parse_ES_response(es_dict):
+def parse_ES_response(es_dict, the_size, the_from, the_sort, the_order):
 	#print es_dict
 	protoDict = {'hits':[]}
 	for hit in es_dict['hits']['hits']:
-		protoDict['hits'].append({
-			'id' : 'DUMMY',
-			'objectID' : 'DUMMY',
-			'access' : 'DUMMY',
-			'study' : ['DUMMY'],
-			'dataCategorization' : {
-				'dataType' : hit['_source']['analysis_type'],
-				'experimentalStrategy' : 'DUMMY'
-			},
-			'fileCopies' : [{
-				'repoDataBundleId' : 'DUMMY',
-				'repoDataSetIds' :[],
-				'repoCode' : 'DUMMY',
-				'repoOrg' : 'DUMMY',
-				'repoName' : 'DUMMY',
-				'repoType' : 'DUMMY',
-				'repoCountry' : 'DUMMY',
-				'repoBaseUrl' : 'DUMMY',
-				'repoDataPath' : 'DUMMY',
-				'repoMetadatapath' : 'DUMMY',
-				'indexFile' : {
-					'id' : 'DUMMY',
-					'objectId' : hit['_source']['download_id'],
-					'fileName' : hit['_source']['title'],
-					'fileFormat' : hit['_source']['file_type'],
-					'fileMd5sum' : 'DUMMY',
-					'fileSize' : 'DUMMY'
-				},
-				'fileName' : hit['_source']['title'],
-				'fileFormat' : hit['_source']['file_type'],
-				'fileMd5sum' : 'DUMMY',
-				'lastModified' : 'DUMMY'
-			}],
-			'donors' : [{
-				'donorId' : hit['_source']['donor'],
-				'primarySite' : 'DUMMY',
-				'projectCode' : hit['_source']['project'],
-				'study' : 'DUMMY',
-				'sampleId' : ['DUMMY'],
-				'specimenType' : [hit['_source']['specimen_type']],
-				'submittedDonorId' : "DUMMY",
-				'submittedSampleId' : ['DUMMY'],
-				'submittedSpecimenId' : ['DUMMY'],
-				'otherIdentifiers' : {
-					'tcgaSampleBarcode' : ['DUMMY'],
-					'tcgaAliquotBarcode' : ['DUMMY']
-				}
-
-			}],
-
-			'analysisMethod' : {
-				'analysisType' : hit['_source']['analysis_type'],
-				'software' : 'DUMMY'
-			},
-			'referenceGenome' : {
-				'genomeBuild' : 'DUMMY',
-				'referenceName' : 'DUMMY',
-				'downloadUrl' : 'DUMMY'
-			}
-		})
+		protoDict['hits'].append(hit['_source'])
 		#print hit
 	#print protoDict
 
 	protoDict['pagination'] = {
 		'count' : len(es_dict['hits']['hits']),#25,
 		'total' : es_dict['hits']['total'],
-		'size' : 25,
-		'from' : 1,
-		'page' : 1,
-		'pages' : -(-es_dict['hits']['total'] // 25),
-		'sort' : 'DUMMY',
-		'order' : 'desc'
+		'size' : the_size,
+		'from' : the_from,
+		'page' : (the_from/(the_size+1))+1, #(the_from/(the_size+1))+1
+		'pages' : -(-es_dict['hits']['total'] // the_size),
+		'sort' : the_sort,
+		'order' : the_order
 	}
 
 	protoDict['termFacets'] = es_dict['aggregations']
@@ -141,7 +82,7 @@ def get_data():
 	mText = es.search(index='mfiles', body={"query": mQuery, "aggs" : {
         "dataType" : {
             "terms" : { "field" : "analysis_type",
-                        "size" : 9999}           
+                        "size" : 99999}           
         },
         "projectCode":{
             "terms":{
@@ -163,5 +104,5 @@ def get_data():
         }
     }, "fields":m_fields_List}, from_=m_From, size=m_Size, sort=m_Sort+":"+m_Order)
 	#return jsonify(mText)
-	return jsonify(parse_ES_response(mText))
+	return jsonify(parse_ES_response(mText, m_Size, m_From, m_Sort, m_Order))
 
