@@ -80,8 +80,8 @@ def get_data():
 		mQuery = {"match_all":{}}
 		pass
 	mText = es.search(index='mfiles', body={"query": mQuery, "aggs" : {
-        "dataType" : {
-            "terms" : { "field" : "analysis_type",
+        "centerName" : {
+            "terms" : { "field" : "center_name",
                         "size" : 99999}           
         },
         "projectCode":{
@@ -101,7 +101,21 @@ def get_data():
                 "field" : "file_type",
                 "size" : 99999
             }
+        },
+        "workFlow":{
+            "terms":{
+                "field" : "workflow",
+                "size" : 99999
+            }
+        },
+        "analysisType":{
+            "terms":{
+                "field" : "analysis_type",
+                "size" : 99999
+            }
         }
+
+
     }, "fields":m_fields_List}, from_=m_From, size=m_Size, sort=m_Sort+":"+m_Order)
 	#return jsonify(mText)
 	return jsonify(parse_ES_response(mText, m_Size, m_From, m_Sort, m_Order))
