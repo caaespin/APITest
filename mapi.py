@@ -3,6 +3,8 @@ from flask import Flask, jsonify, request
 from flask.ext.elasticsearch import Elasticsearch
 #import json
 import ast
+#import the cors tools
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
 es = Elasticsearch()
@@ -54,6 +56,7 @@ def parse_ES_response(es_dict, the_size, the_from, the_sort, the_order):
 
 #This returns the agreggate terms and the list of hits from ElasticSearch
 @app.route('/files/')
+@cross_origin()
 def get_data():
 	#Get all the parameters from the URL
 	m_field = request.args.get('field')
@@ -67,7 +70,7 @@ def get_data():
 	mQuery = {}
 	#Gets the index in [0 - (N-1)] form to communicate with ES
 	m_From -= 1 
-	print m_filters
+	#print m_filters
 	#print dict(m_filters)
 	#print m_filters['file']
 	#get a list of all the fields requested
@@ -75,14 +78,14 @@ def get_data():
 		m_fields_List = [x.strip() for x in m_field.split(',')]
 	except:
 		m_fields_List = None
-	print m_fields_List
+	#print m_fields_List
 	#Get a list of all the Filters requested
 	try:
 		m_filters = ast.literal_eval(m_filters)
 		filt_list = [{"match":{x:y['is'][0]}} for x,y in m_filters['file'].items()]
 		mQuery = {"bool":{"must":filt_list}}
-		print filt_list	
-		print mQuery	
+		#print filt_list	
+		#print mQuery	
 		#print m_filters['file']
 		#pass
 	except:
