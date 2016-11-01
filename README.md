@@ -10,7 +10,7 @@ Simple Flask web service to communicate with ElasticSearch and output the list o
 sudo easy_install virtualenv
 ```
 <br>
-1.-Download this repo by using `git clone https://github.com/caaespin/APITest.git`<br>
+1.-Download this repo by using `git clone https://github.com/caaespin/APITest.git`. Make sure you are on the "forBrowserTesting" branch by using `git checkout forBrowserTesting`<br>
 2.-The repo includes a sample jsonl file called elasticsearch.jsonl. It is a sample search index for testing purposes. Use `curl -XPOST "http://localhost:9200/mfiles/mfile/_bulk?pretty" --data-binary  @elasticsearch.jsonl` to index the data in elasticsearch.jsonl. <br>
 3.-Use `virtualenv venv` to set up your virtualenv. Activate it using `. venv/bin/activate`<br>
 4.-In case you don't have Flask and the Flask ElasticSearch client, use:
